@@ -1,12 +1,12 @@
-# 📺 Alpha Verdict: YouTube Auto-Publisher & Viral SEO Scheduler
+# 📺 Alpha Verdict: Full-Length YouTube Auto-Publisher & SEO Scheduler
 
 [![Channel](https://img.shields.io/badge/YouTube-Alpha_Verdict-red?logo=youtube)](https://youtube.com)
 [![YouTube Data API](https://img.shields.io/badge/YouTube_API-v3_Resumable_Upload-red)](https://developers.google.com/youtube/v3)
 [![Metadata AI](https://img.shields.io/badge/Groq%20Cloud-Qwen_3.8_%2F_Llama_3.3-orange)](https://groq.com)
 [![Storage](https://img.shields.io/badge/Google_Drive-API_v3_Archival-green?logo=googledrive)](https://developers.google.com/drive)
-[![Automation](https://img.shields.io/badge/GitHub_Actions-Twice_Daily_(14x%2Fweek)-brightgreen?logo=githubactions)](https://github.com/features/actions)
+[![Automation](https://img.shields.io/badge/GitHub_Actions-Daily_@_6:00_PM_IST-brightgreen?logo=githubactions)](https://github.com/features/actions)
 
-An automated cloud microservice that syncs rendered IPO vertical videos from **Google Drive**, validates asset integrity, generates high-retention viral YouTube Shorts metadata using **Groq Cloud (Qwen 3.8 / Llama 3.3)**, schedules them via **YouTube Data API v3** with a **24-hour forward buffer**, auto-posts pinned engagement comments, and archives processed Drive folders.
+An automated cloud microservice that syncs rendered 16:9 full-length IPO deep-dive videos from **Google Drive**, uploads high-CTR **1280×720 custom thumbnails**, generates **clickable interactive chapter timestamps** with **Groq Cloud AI (Qwen 3.8 / Llama 3.3)**, schedules them via **YouTube Data API v3** for **tomorrow at 06:00 PM IST**, auto-posts pinned discussion comments, and archives processed Drive folders.
 
 ---
 
@@ -14,41 +14,45 @@ An automated cloud microservice that syncs rendered IPO vertical videos from **G
 
 ```mermaid
 flowchart TD
-    A["Google Drive: 'IPO Automation' Folder"] -->|1. List Unworked Folders| B["Scan for Candidate Folders\n(scripts/sync_drive.ts)"]
+    A["Google Drive: 'IPO Automation' Root"] -->|1. List Unworked Folders| B["Scan for Candidate Folders\nscripts/sync_drive.ts"]
     
-    B --> C{"Check data/uploaded_youtube.json\nAlready Processed?"}
-    C -- Yes --> D["Skip: Already Published"]
+    B --> C{"Check uploaded_youtube.json\nAlready Processed?"}
+    C -- Yes --> D["Skip: Already Scheduled"]
     C -- No --> E{"Verify .mp4 Video Exists\nin Drive Folder?"}
     
-    E -- Missing Video --> F["⚠️ Graceful Exit (Code 0)\nNo Pipeline Failure"]
-    E -- Valid Video --> G["Download Bundle to temp/slug/\n• video.mp4\n• assets/ipo_data.json\n• assets/script.txt"]
+    E -- Missing Video --> F["Graceful Exit (Code 0)\nNo Pipeline Failure"]
+    E -- Valid Video --> G["Download Bundle to temp/slug/\n• video.mp4 (16:9 Full-Length)\n• assets/thumbnail.png\n• assets/ipo_data.json\n• assets/script.txt"]
     
-    G --> H["Company Name Sanitizer\nStrip 'Limited', 'Pvt Ltd', 'Technologies'\nEnforce Base Brand Name ≤ 22 chars"]
+    G --> H{"Thumbnail Present\nin Drive Folder?"}
+    H -- Pre-rendered --> I["Use Drive Thumbnail\n(1280x720 PNG)"]
+    H -- Missing --> J["Sharp Fallback Generator\nSynthesize High-CTR 1280x720 PNG"]
     
-    H --> I["AI Viral Metadata Engine (Groq LPU)\n(scripts/generate_metadata.ts)"]
+    I & J --> K["AI Metadata & Chapter Engine\nscripts/generate_metadata.ts"]
     
-    subgraph AI Viral Metadata & SEO Optimization
-        I --> J1["📌 Clamped Viral Title\n(Strictly ≤ 65 chars + #Shorts)"]
-        I --> J2["📝 SEO Description\n(Snapshot, Financials, Disclaimer, ➔ Arrows)"]
-        I --> J3["🏷️ Search Tags\n(15-20 Target Keywords, Under 450 Chars)"]
-        I --> J4["💬 Pinned Engagement Question\n(High-Retention Discussion Magnet)"]
+    subgraph AI Metadata & SEO Optimization
+        K --> L1["High-CTR Long-Form Title\n(60-80 chars, No #Shorts)"]
+        L1 --> L2["Interactive Chapter Timestamps\n(00:00, 00:46... Native YouTube Scrubbing)"]
+        L2 --> L3["SEO Description & Statutory Disclaimer\n(SEBI Disclaimers, Financials & Tags)"]
+        L3 --> L4["Pinned Discussion Comment\n(Community Engagement Magnet)"]
     end
     
-    J1 & J2 & J3 & J4 --> K["YouTube API Compliance Sanitizer\nStrip '<' and '>' / Replace '->' with '➔'\nEnforce Byte & Character Budgets"]
+    L4 --> M["YouTube API Compliance Sanitizer\nStrip forbidden angle brackets\nCap tags under 450 chars"]
     
-    K --> L["YouTube Data API v3 Resumable Upload\n(scripts/publish_youtube.ts)"]
+    M --> N["YouTube Data API v3 Resumable Upload\nscripts/publish_youtube.ts"]
     
-    L --> M["24-Hour Forward Scheduling Engine\n• Morning Run ➔ Tomorrow Morning (09:00 AM IST)\n• Evening Run ➔ Tomorrow Evening (06:30 PM IST)\n(100% Immune to GitHub Actions Queue Latency)"]
+    N --> O["Attach 1280x720 Custom Thumbnail\nyoutube.thumbnails.set"]
     
-    M --> N["Auto-Post Pinned Comment\n(youtube.commentThreads.insert)"]
+    O --> P["Schedule for Tomorrow @ 06:00 PM IST\n18:00 IST / 12:30 UTC\n100% Queue Delay Immune"]
     
-    N --> O["Google Drive Archival\nMove Company Folder into 'Uploaded/'\n(drive.files.update addParents/removeParents)"]
+    P --> Q["Auto-Post Pinned Comment\nyoutube.commentThreads.insert"]
     
-    O --> P["Update data/uploaded_youtube.json\n(Sliding 50-Item FIFO Tracker)"]
+    Q --> R["Google Drive Archival\nMove Company Folder into 'Uploaded/'"]
     
-    P --> Q["Purge Local temp/ Cache\n(Zero Runner Disk Footprint)"]
+    R --> S["Update data/uploaded_youtube.json\nRolling FIFO Tracker"]
     
-    Q --> R["Git Auto-Commit [skip ci]\nPush Updated Tracker to GitHub"]
+    S --> T["Purge Local temp/ Cache\nZero Runner Disk Footprint"]
+    
+    T --> U["Git Auto-Commit [skip ci]\nPush Updated Tracker to GitHub"]
 ```
 
 ---
@@ -60,39 +64,42 @@ sequenceDiagram
     autonumber
     participant GHA as GitHub Actions Runner
     participant Drive as Google Drive API
-    participant Tracker as data/uploaded_youtube.json
-    participant Groq as Groq Cloud AI (Qwen/Llama)
+    participant Sharp as Fallback Thumbnail Engine
+    participant Groq as Groq AI (Qwen/Llama)
     participant YouTube as YouTube Data API v3
     participant Git as GitHub Repository
 
-    GHA->>Drive: Scan 'IPO Automation' for company folders
-    Drive-->>GHA: Return folders (e.g. POOJA LOGISTICS)
+    GHA->>Drive: Scan 'IPO Automation' for candidate folders
+    Drive-->>GHA: Return folder (e.g. MONEY VIEW TECHNOLOGIES)
     
-    GHA->>Tracker: Check if slug is already uploaded
-    Tracker-->>GHA: Not uploaded
+    GHA->>Drive: Verify 16:9 .mp4 exists in folder
+    Drive-->>GHA: Video verified
     
-    GHA->>Drive: Check if .mp4 exists in folder
-    Drive-->>GHA: Video verified (8.7 MB)
-    
-    GHA->>Drive: Download video.mp4, ipo_data.json, script.txt
+    GHA->>Drive: Download video.mp4, thumbnail.png, ipo_data.json, script.txt
     Drive-->>GHA: Assets downloaded to temp/slug/
     
-    GHA->>Groq: Generate title, description, tags & pinned comment
-    Groq-->>GHA: Return viral metadata
+    alt Thumbnail not found on Drive
+        GHA->>Sharp: Synthesize 1280x720 fallback PNG thumbnail
+        Sharp-->>GHA: Return generated thumbnail.png
+    end
     
-    GHA->>GHA: Sanitize text: clamp title <= 65 chars, strip '<' and '>', replace '->' with '➔'
-    GHA->>GHA: Compute 24-hr forward schedule timestamp (UTC)
+    GHA->>Groq: Generate title, SEO description, chapter timestamps & tags
+    Groq-->>GHA: Return structured JSON metadata
     
-    GHA->>YouTube: Resumable upload (snippet + status: private + publishAt)
+    GHA->>GHA: Calculate Tomorrow 06:00 PM IST timestamp (12:30 UTC)
+    
+    GHA->>YouTube: Resumable video upload (status: private + publishAt)
     YouTube-->>GHA: Video created with Video ID
     
-    GHA->>YouTube: Insert top-level pinned engagement comment
-    YouTube-->>GHA: Comment posted successfully
+    GHA->>YouTube: Upload 1280x720 custom thumbnail (thumbnails.set)
+    YouTube-->>GHA: Thumbnail set successfully
+    
+    GHA->>YouTube: Post top-level engagement comment (commentThreads.insert)
+    YouTube-->>GHA: Pinned comment live
     
     GHA->>Drive: Move company folder from 'IPO Automation' to 'Uploaded/'
-    Drive-->>GHA: Folder moved (addParents/removeParents)
+    Drive-->>GHA: Folder archived
     
-    GHA->>Tracker: Record video ID, URL, title & scheduled timestamp
     GHA->>Git: Commit updated tracker with [skip ci]
 ```
 
@@ -100,51 +107,50 @@ sequenceDiagram
 
 ## 💎 3. Key Production Features
 
-### 1. 🛡️ Strict Title Length Clamping & Name Sanitization
-* **Problem**: YouTube allows up to 100 characters in titles, but mobile YouTube Shorts feeds truncate any title over **60–65 characters** with an ellipsis (`...`), hiding the hook and `#Shorts` tag.
-* **Solution**:
-  * Strips corporate legal noise words (`Private Limited`, `Pvt Ltd`, `Limited`, `Technologies`, `Industries`, `Holdings`, `India`, etc.).
-  * Formula: `[Short Brand] IPO: [Hook] 🚨 #Shorts`
-  * Strict code-level double-lock clamps titles $\le 65$ characters.
+### 1. 🖼️ Custom 1280×720 Thumbnail Pipeline
+* **Primary Source**: Ingests pre-rendered 1280×720 thumbnails from Google Drive (`assets/thumbnail.png`) rendered by Remotion Still.
+* **On-the-Fly Fallback**: If missing, synthesizes a high-contrast 1280×720 PNG using `sharp` within 20 milliseconds, incorporating brand colors, company logo, key financial cards, and analyst verdict badge.
+* **Direct YouTube API Upload**: Calls `youtube.thumbnails.set()` immediately after video insertion.
 
-### 2. ⏰ 24-Hour Forward Scheduling Buffer (Queue Delay Immunity)
-* **Problem**: GitHub Actions runners can experience cloud queue delays (5–30 minutes). Scheduling a video for "soon" risks past-timestamp rejection (`publishAt must be in the future`).
-* **Solution**:
-  * **Morning Run (~09:30 AM IST)**: Schedules for **Tomorrow Morning at 09:00 AM IST** (~23.5 hours ahead).
-  * **Evening Run (~07:30 PM IST)**: Schedules for **Tomorrow Evening at 06:30 PM IST** (~23.0 hours ahead).
-  * 100% immune to runner latency + gives YouTube 24 hours to process high-definition VP9/AV1 codecs and optimize Shorts shelf distribution.
+### 2. ⏱️ Interactive Chapter Timestamps
+* YouTube automatically converts timestamp notations (`00:00 - Title`) in descriptions into clickable chapters on the video progress bar.
+* [generate_metadata.ts](scripts/generate_metadata.ts) extracts `timeline.chapters` from `ipo_data.json` and calculates frame-accurate MM:SS timestamps:
+  ```text
+  ⏱️ CHAPTER TIMESTAMPS:
+  00:00 - Introduction & Issue Overview
+  00:46 - Business Model & Revenue Segments
+  01:35 - Sector Backdrop & Market TAM
+  02:25 - 3-Year Financial Statements & Margins
+  03:20 - Issue Split & Fresh Capital Allocation
+  04:12 - Listed Peer Benchmarking & Valuation
+  05:05 - Critical Red Flags & Structural Risks
+  05:58 - Final Analyst Scorecard & Verdict
+  ```
 
-### 3. 🗂️ Google Drive Archival (`Uploaded/`)
-* Once a video is successfully scheduled on YouTube, the entire company directory (video + `ipo_data.json` + `script.txt`) is moved into an **`Uploaded/`** folder via `drive.files.update`. The root folder remains pristine and uncluttered.
+### 3. ⏰ Daily 6:00 PM IST Next-Day Scheduling
+* Videos created today are scheduled for **Tomorrow at 06:00 PM IST (18:00 IST / 12:30 UTC)**.
+* **Queue-Delay Immunity**: Even if GitHub Actions runner experiences peak-hour queue delays, the target publish time is ~24 hours in the future, guaranteeing that YouTube never rejects `publishAt`.
+* **7 Videos Weekly Cadence**: Exactly one high-quality full-length video published daily.
 
-### 4. 🔍 Graceful Video Existence Check
-* If a company folder is missing an `.mp4` file, the publisher logs a clear warning and exits gracefully with code `0`, avoiding false alarm failures in GitHub Actions.
+### 4. 🛡️ YouTube API Compliance Sanitizer
+* YouTube strictly rejects descriptions or tags containing angle brackets (`<` or `>`).
+* Automatically replaces arrow notations (`->`, `=>`) with unicode **`➔`**, strips disallowed characters, and enforces the 500-character tag budget.
 
-### 5. 🛡️ YouTube API Character Sanitizer
-* YouTube Data API v3 strictly rejects descriptions and tags containing `<` or `>`. The sanitizer automatically replaces arrow notations (`->`, `=>`) with unicode **`➔`**, cleans stray brackets, and enforces the 500-character tag budget.
+### 5. 🗂️ Zero-Clutter Google Drive Archival
+* Once a video is successfully scheduled, the entire company directory is relocated into an **`Uploaded/`** archive folder via `drive.files.update`. The root folder remains clean.
 
 ---
 
-## 🎨 4. Channel Identity & Official Assets
-
-* **Channel Name**: **Alpha Verdict**
-* **Handle**: `@AlphaVerdict`
-* **Official Branding Files**:
-  * **Banner (2560×1440 px)**: [`assets/branding/alpha_verdict_banner_2560x1440.jpg`](assets/branding/alpha_verdict_banner_2560x1440.jpg)
-  * **Profile Icon (800×800 px)**: [`assets/branding/alpha_verdict_icon_800x800.jpg`](assets/branding/alpha_verdict_icon_800x800.jpg)
-
----
-
-## ⚙️ 5. Setup Guide
+## ⚙️ 4. Setup Guide
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/rajnishkumar13500/ipo-youtube-publisher.git
-cd ipo-youtube-publisher
+git clone https://github.com/rajnishkumar13500/yt-schedular-full-length.git
+cd yt-schedular-full-length
 npm install
 ```
 
-### 2. Configure Local Environment (`.env`)
+### 2. Configure Environment (`.env`)
 ```env
 # ─── Google Drive Ingestion (Read Videos & Assets) ─────────────────────────
 GDRIVE_REFRESH_TOKEN=your_gdrive_refresh_token
@@ -152,12 +158,12 @@ GDRIVE_CLIENT_ID=your_client_id.apps.googleusercontent.com
 GDRIVE_CLIENT_SECRET=your_client_secret
 GDRIVE_PARENT_FOLDER_ID=your_parent_folder_id
 
-# ─── YouTube Data API v3 (Upload & Schedule Videos) ────────────────────────
+# ─── YouTube Data API v3 (Upload, Thumbnail & Schedule) ────────────────────
 YOUTUBE_CLIENT_ID=your_client_id.apps.googleusercontent.com
 YOUTUBE_CLIENT_SECRET=your_client_secret
 YOUTUBE_REFRESH_TOKEN=your_youtube_refresh_token
 
-# ─── Groq AI Metadata Generation (Viral Titles & Descriptions) ─────────────
+# ─── Groq AI Metadata Generation (SEO Titles & Chapters) ───────────────────
 GROQ_API_KEY=gsk_your_groq_api_key
 GROQ_MODEL=qwen/qwen3.8-27b
 
@@ -173,24 +179,23 @@ YOUTUBE_DEFAULT_LANGUAGE=en
 npm run auth:youtube
 ```
 1. Open the printed authorization link in your browser.
-2. Sign in with the Google Account that owns **Alpha Verdict**.
-3. The local server automatically captures your `YOUTUBE_REFRESH_TOKEN` and writes it to `.env`!
+2. Sign in with the Google Account that owns your YouTube channel.
+3. The local OAuth server writes `YOUTUBE_REFRESH_TOKEN` directly to `.env`.
 
-### 4. Verify Connection
+### 4. Test Connection
 ```bash
 npm run test:youtube
 ```
-Confirms channel title, subscriber count, and upload capabilities.
 
-### 5. Run Audit & Dry-Run (Non-Destructive)
+### 5. Run Non-Destructive Audit & Dry Run
 ```bash
 npm run verify
 ```
-Inspects candidate folders on Google Drive, runs AI metadata generation, checks 9 compliance rules, and displays the exact output preview without publishing.
+Scans Drive, downloads assets, synthesizes thumbnail, runs AI metadata & timestamp generation, and tests all compliance rules without publishing.
 
 ---
 
-## 🛠️ 6. CLI Commands Reference
+## 🛠️ 5. CLI Commands Reference
 
 | Command | Action |
 | :--- | :--- |
@@ -198,16 +203,15 @@ Inspects candidate folders on Google Drive, runs AI metadata generation, checks 
 | `npm run test:youtube` | Tests connection with YouTube API and verifies channel metadata |
 | `npm run sync:drive` | Scans Google Drive for unworked folders and verifies `.mp4` video presence |
 | `npm run verify` | Performs a complete non-destructive dry-run audit of metadata & compliance |
-| `npm run publish` | Executes live end-to-end publishing, scheduling, commenting, and Drive archival |
+| `npm run publish` | Executes live end-to-end publishing, thumbnail setting, commenting, and Drive archival |
 
 ---
 
-## 🤖 7. GitHub Actions Cloud Automation
+## 🤖 6. GitHub Actions Cloud Automation
 
-The publisher workflow in [`.github/workflows/youtube_publisher.yml`](.github/workflows/youtube_publisher.yml) runs **twice daily, 7 days a week**:
+The automated workflow in [`.github/workflows/youtube_publisher.yml`](.github/workflows/youtube_publisher.yml) runs **daily at 06:00 PM IST** (7 days/week):
 
-* **Morning Run**: `04:00 UTC` (**09:30 AM IST**) ➔ Schedules for **Tomorrow 09:00 AM IST**
-* **Evening Run**: `14:00 UTC` (**07:30 PM IST**) ➔ Schedules for **Tomorrow 06:30 PM IST**
+* **Schedule Trigger**: `12:30 UTC` (**06:00 PM IST**) ➔ Schedules for **Tomorrow 06:00 PM IST**
 * **Manual Dispatch**: Triggerable anytime with optional privacy overrides.
 
 ### Required GitHub Repository Secrets
@@ -220,5 +224,3 @@ Under **Settings ➔ Secrets and variables ➔ Actions**, configure:
 6. `GDRIVE_CLIENT_SECRET`
 7. `GDRIVE_PARENT_FOLDER_ID`
 8. `GROQ_API_KEY`
-#   y t - s c h e d u l a r - f u l l - l e n g t h  
- 
