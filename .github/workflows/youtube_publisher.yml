@@ -1,0 +1,77 @@
+name: Scheduled YouTube Full-Length Video Publisher
+
+on:
+  schedule:
+    # Daily Run: 06:00 PM IST (12:30 UTC) - Every day (Mon - Sun, 7 days/week)
+    - cron: '30 12 * * *'
+
+  workflow_dispatch:
+    inputs:
+      auto_schedule:
+        description: 'Auto schedule video for tomorrow 6:00 PM IST (true/false)'
+        required: false
+        default: 'true'
+      privacy_status:
+        description: 'Privacy status (public, unlisted, private) - used if auto_schedule is false'
+        required: false
+        default: 'private'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: youtube-fulllength-publisher
+  cancel-in-progress: false
+
+jobs:
+  publish-fulllength:
+    name: Sync Drive, Generate Chapters SEO, Upload Thumbnail & Schedule Video
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install NPM Dependencies
+        run: npm ci
+
+      - name: Run Full-Length YouTube Auto-Publisher Pipeline
+        env:
+          GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+          GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+          GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+          GDRIVE_PARENT_FOLDER_ID: ${{ secrets.GDRIVE_PARENT_FOLDER_ID }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GROQ_MODEL: ${{ vars.GROQ_MODEL || 'qwen/qwen3.8-27b' }}
+          YOUTUBE_AUTO_SCHEDULE: ${{ github.event.inputs.auto_schedule || 'true' }}
+          YOUTUBE_PRIVACY_STATUS: ${{ github.event.inputs.privacy_status || 'private' }}
+          YOUTUBE_CATEGORY_ID: ${{ vars.YOUTUBE_CATEGORY_ID || '27' }}
+          YOUTUBE_DEFAULT_LANGUAGE: ${{ vars.YOUTUBE_DEFAULT_LANGUAGE || 'en' }}
+        run: npm run publish
+
+      - name: Commit & Push Updated Upload Tracker
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/uploaded_youtube.json
+          if git diff --staged --quiet; then
+            echo "✨ No new videos uploaded. Tracker is up-to-date."
+          else
+            git commit -m "chore: record new YouTube video upload [skip ci]"
+            git pull --rebase origin main
+            git push origin main
+            echo "✅ Tracker committed and pushed to main."
+          fi

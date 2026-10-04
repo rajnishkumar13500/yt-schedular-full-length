@@ -1,0 +1,37 @@
+{
+  "name": "ipo-youtube-fulllength-publisher",
+  "version": "1.0.0",
+  "description": "Automated YouTube Full-Length Deep-Dive publisher, thumbnail uploader, and chapter metadata generator for IPO videos",
+  "main": "scripts/pipeline.ts",
+  "scripts": {
+    "auth:youtube": "tsx scripts/auth_youtube.ts",
+    "test:youtube": "tsx scripts/test_youtube.ts",
+    "sync:drive": "tsx scripts/sync_drive.ts",
+    "generate:metadata": "tsx scripts/generate_metadata.ts",
+    "verify": "tsx scripts/verify_pipeline.ts",
+    "publish": "tsx scripts/pipeline.ts",
+    "pipeline": "tsx scripts/pipeline.ts"
+  },
+  "dependencies": {
+    "@types/sharp": "^0.31.1",
+    "dotenv": "^16.4.7",
+    "googleapis": "^144.0.0",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "ipo",
+    "youtube",
+    "automation",
+    "publisher",
+    "groq",
+    "qwen",
+    "seo"
+  ],
+  "author": "",
+  "license": "ISC"
+}
