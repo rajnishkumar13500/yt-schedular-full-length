@@ -1,5 +1,16 @@
 {
   "version": 1,
-  "lastUpdated": "",
-  "history": []
+  "lastUpdated": "2026-10-06T06:06:32.776Z",
+  "history": [
+    {
+      "ipoSlug": "acme-universal",
+      "companyName": "Acme Universal",
+      "youtubeVideoId": "lKS-lb9xjIk",
+      "youtubeUrl": "https://youtu.be/lKS-lb9xjIk",
+      "publishedAt": "2026-10-06T06:06:32.775Z",
+      "scheduledFor": "2026-10-07T12:30:00.000Z",
+      "privacyStatus": "private",
+      "title": "Acme Universal IPO: 28% Growth or Overpriced Trap? 🚨 Full Deep Dive"
+    }
+  ]
 }
